@@ -2,10 +2,23 @@ import sqlite3
 from datetime import date
 import pandas as pd
 import streamlit as st
+from pathlib import Path
+import os
 
 DB_NAME = "hotel.db"
 
 # ---------- helper layer ----------
+#Rebuild hotel.db from schema & sample data if it doesn't exist
+if not Path("hotel.db").exists():
+    try:
+        from create_db import execute_script
+        execute_script("schema_sqlite.sql")
+        execute_script("sample_data.sql")
+    except Exception as e:
+        import streamlit as st
+        st.error("Failed to create hotel.db on Streamlit Cloud.")
+        st.exception(e)
+
 @st.cache_resource(show_spinner=False)
 def get_connection():
     return sqlite3.connect(DB_NAME, check_same_thread=False)
